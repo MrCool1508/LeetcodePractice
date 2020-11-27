@@ -59,16 +59,16 @@ struct hashTable {
     int            val;
     UT_hash_handle hh;
 };
-int fourSumCount(int* A, int ASize, int* B, int BSize, int* C, int CSize, int* D, int DSize) {
-    struct hashTable* hashtable = NULL;
+int fourSumCount(int *A, int ASize, int *B, int BSize, int *C, int CSize, int *D, int DSize) {
+    struct hashTable *hashtable = NULL;
     for (int i = 0; i < ASize; ++i) {
         for (int j = 0; j < BSize; ++j) {
             int ikey = A[i] + B[j];    //键是二者和
 
-            struct hashTable* tmp;
+            struct hashTable *tmp;
             HASH_FIND_INT(hashtable, &ikey, tmp);
             if (tmp == NULL) {
-                struct hashTable* tmp = malloc(sizeof(struct hashTable));
+                struct hashTable *tmp = malloc(sizeof(struct hashTable));
                 tmp->key = ikey, tmp->val = 1;
                 HASH_ADD_INT(hashtable, key, tmp);
             } else {
@@ -81,12 +81,97 @@ int fourSumCount(int* A, int ASize, int* B, int BSize, int* C, int CSize, int* D
         for (int j = 0; j < DSize; ++j) {
             int ikey = -C[i] - D[j];    //键是二者和，为c+d的相反数
 
-            struct hashTable* tmp;
+            struct hashTable *tmp;
             HASH_FIND_INT(hashtable, &ikey, tmp);    //在a+b中查找相反数
             if (tmp != NULL) {
                 res += tmp->val;    //精髓
             }
         }
     }
+    return res;
+}
+//自定义哈希表，只处理int，内存和处理时间都大幅缩短
+#define mod 100003
+
+typedef struct Link {
+    int          key;
+    int          val;
+    struct Link *next;
+} Link;
+
+typedef struct {
+    Link *arr[mod];
+} MyHash;
+
+Link *_get(MyHash *hash, int key) {
+    int   idx  = abs(key) % mod;
+    Link *node = hash->arr[idx];
+    while (node && node->key != key) {
+        node = node->next;
+    }
+    return node;
+}
+
+void _insert(MyHash *hash, int key, int val) {
+    Link *node = _get(hash, key);
+    if (!node) {
+        node           = malloc(sizeof(Link));
+        node->key      = key;
+        node->val      = val;
+        int idx        = abs(key) % mod;
+        node->next     = hash->arr[idx];
+        hash->arr[idx] = node;
+    } else {
+        node->val = val;
+    }
+}
+
+void _add(MyHash *hash, int key) {
+    Link *node = _get(hash, key);
+    if (!node) {
+        node           = malloc(sizeof(Link));
+        node->key      = key;
+        node->val      = 1;
+        int idx        = abs(key) % mod;
+        node->next     = hash->arr[idx];
+        hash->arr[idx] = node;
+    } else {
+        node->val += 1;
+    }
+}
+
+void _initHash(MyHash *hash) {
+    memset(hash->arr, 0, sizeof(hash->arr));
+}
+
+void _freeHash(MyHash *hash) {
+    for (int i = 0; i < mod; ++i) {
+        if (hash->arr[i]) {
+            Link *node = hash->arr[i];
+            while (node) {
+                Link *next = node->next;
+                free(node);
+                node = next;
+            }
+        }
+    }
+}
+
+int fourSumCount(int *A, int ASize, int *B, int BSize, int *C, int CSize, int *D, int DSize) {
+    MyHash hash;
+    _initHash(&hash);
+    int res = 0;
+    for (int i = 0; i < ASize; ++i) {
+        for (int j = 0; j < BSize; ++j) {
+            _add(&hash, A[i] + B[j]);
+        }
+    }
+    for (int i = 0; i < CSize; ++i) {
+        for (int j = 0; j < DSize; ++j) {
+            Link *node = _get(&hash, -(C[i] + D[j]));
+            if (node) res += node->val;
+        }
+    }
+    _freeHash(&hash);
     return res;
 }
