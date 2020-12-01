@@ -71,7 +71,7 @@ char* reorganizeString(char* S) {
     }
     return res;
 }
-
+/*题解*/
 char* reorganizeString(char* S) {
     int n = strlen(S);
     if (n < 2) {
