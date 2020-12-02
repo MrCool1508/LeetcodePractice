@@ -12,28 +12,45 @@
 //     return *(int*)a - *(int*)b;
 // }
 //暴力解法：找出所有全排列，再qsort最小
-char* nonZeroProcess(char* num, int k) {
-    int  numLen = strlen(num);
-    int* temp   = (int*)calloc(numLen, sizeof(int));
-    for (int i = 0; i < strlen; i++) {
-        temp[i] = num[i] - '0';
-    }
-    int permutationLen = numLendec int* permutation = (int*)calloc( )
+//以下思路行不通....
+int myCpr(const void* a, const void* b) {
+    return *(int*)a - *(int*)b;
 }
 char* removeKdigits(char* num, int k) {
-    int num_Len  = strlen(num);    //数字串的位数
-    int zero_pos = -1;
-    for (int i = 0; i < num_Len; i++) {
-        if (num[i] == '0') {
-            zero_pos = i;
-            break;
+    int numLen = strlen(num);
+    if (k == numLen) {
+        return NULL;
+    }
+    //整理成数组
+    int  zeroFlag = 0;
+    int* temp     = calloc(numLen, sizeof(int));
+    for (int i = 0; i < numLen; i++) {
+        temp[i] = num[i] - '0';
+        if (temp[i] == 0) {
+            zeroFlag = 1;
         }
     }
-    if (zero_pos == -1) {
-        /* code */
+    // qsort该数组
+    int* tempQsort = calloc(numLen, sizeof(int));
+    memcpy(tempQsort, temp, numLen * sizeof(int));
+    qsort(tempQsort, numLen, sizeof(int), myCpr);
+    if (0 == zeroFlag) {
+        int   resLen = numLen - k + 1;
+        char* res    = (char*)malloc(resLen * sizeof(char));
+        char* ptr    = res;
+        for (int i = 0; i < numLen; i++) {
+            for (int j = 0; j < numLen - k; j++) {
+                if (num[i] == tempQsort[j] + '0') {
+                    *ptr         = tempQsort[j] + '0';
+                    tempQsort[j] = -100;
+                    *ptr++;
+                    break;
+                }
+            }
+        }
+        res[resLen - 1] = '\0';
+        return res;
     } else {
-        /* code */
+        return NULL;    //没想好怎么写
     }
-
-    //滑动窗口
 }
