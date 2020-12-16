@@ -85,3 +85,35 @@ int* nextGreaterElement(int* nums1, int nums1Size, int* nums2, int nums2Size, in
     }
     return res;
 }
+// 题解——单调递减栈
+int stack[1000];
+int g_top;
+
+int* nextGreaterElement(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize) {
+    int  i;
+    int  bigIndex[1000];
+    int* result = (int*)malloc(nums1Size * sizeof(int));
+    g_top       = 0;
+
+    memset(bigIndex, -1, sizeof(bigIndex));
+
+    stack[g_top++] = 0;
+    for (i = 1; i < nums2Size; i++) {
+        while (g_top > 0 && nums2[i] > nums2[stack[g_top - 1]]) {
+            bigIndex[stack[g_top - 1]] = nums2[i];
+            g_top--;
+        }
+        stack[g_top++] = i;
+    }
+
+    for (i = 0; i < nums1Size; i++) {
+        for (int j = 0; j < nums2Size; j++) {
+            if (nums1[i] == nums2[j]) {
+                result[i] = bigIndex[j];
+            }
+        }
+    }
+
+    *returnSize = nums1Size;
+    return result;
+}
